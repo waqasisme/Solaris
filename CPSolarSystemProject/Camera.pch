@@ -1,0 +1,93 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    Camera.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   Camera.pch contains a class that creates an Ogre3d Camera from the root, and functionality to
+   operate that camera (change position, view, vision, aspect ratio, etc).
+
+-------------------------------------------------------------------------------------------------
+*/
+	// Header Guard
+#ifndef Camera_h_
+#define Camera_h_
+
+#include "Defines.pch"
+
+using namespace Ogre;
+
+
+//---------------------------------------------------------------------------------------------------------------
+class CameraInput {
+protected:
+	Camera* mCamera;	// Pointer to an Ogre Camera
+
+public:
+		// Constructor
+	CameraInput(): mCamera(0)
+	{}
+
+		// Create and setup Camera position, viewports etc
+	void setupCamera(SceneManager* mSceneMgr, RenderWindow* rWindow, String CamName)
+	{
+			// Create the camera
+		mCamera = mSceneMgr->createCamera(CamName);
+			
+			// setPosition
+		setPosition(Vector3(-153300, 26373, 5400));
+		
+			// Look back along -Z (Toward User)
+		lookAt(Vector3(-0.04, -0.8, -0.07));
+		
+			// set Near and Far Clip distances
+		mCamera->setNearClipDistance(5);
+		mCamera->setFarClipDistance(200000);
+	
+			// Assign our camera a viewports of Window HeightxWidth
+		createViewports(rWindow);
+
+			// Our camera shouldn't get in the way of the sunlight
+		mCamera->setCastShadows(false);
+	}
+
+
+	
+	void setPosition(Vector3 Vec)
+	{
+		mCamera->setPosition(Vec);
+	}
+
+	void lookAt(Vector3 Vec)
+	{
+		mCamera->lookAt(Vec);
+	}
+	
+	void createViewports(RenderWindow* rWindow)
+	{
+			// Create one viewport, entire window
+		Ogre::Viewport* vp = rWindow->addViewport(mCamera);
+		vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+				// Alter the camera aspect ratio to match the viewport
+		mCamera->setAspectRatio(Ogre::Real(vp->getActualWidth()) / Ogre::Real(vp->getActualHeight()));
+	}
+
+	void setCamera(Camera* Custom)	// Mutator
+	{
+		mCamera = Custom; 
+	}
+
+	Ogre::Camera* getCamera()	// Accessor
+	{
+		return mCamera;
+	}
+
+	virtual ~CameraInput()	// Destructor
+	{	mCamera = 0;	}
+
+};
+
+
+
+#endif //endif Camera.pch header guard

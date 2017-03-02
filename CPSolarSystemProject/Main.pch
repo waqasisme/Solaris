@@ -1,0 +1,52 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    Main.pch
+-------------------------------------------------------------------------------------------------
+
+This header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   Main.pch is the executable directory. It runs the program by incorporating all our designed
+   classes and functions, parsing and including all our resources (from our plugin, config and
+   resource file), overriding OGRE and OIS rendering and listener functions, registering with
+   Windows (through WinAPI) and then launching a window that renders eveything onto the screen.
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef __Main_h_
+#define __Main_h_
+
+#include "Defines.pch"
+#include "FilePaths.pch"
+#include "ResourceManager.pch"
+#include "InputManager.pch"
+#include "SolarSystem.pch"
+
+
+//-----------------------------------------------------------------------------------------------
+class MainProgram
+{
+private:
+	FilePaths* Files;
+	ResourceLoader* mResourceMgr;
+	InputListener* mListener;
+	SolarSystem* mSolarSystem;
+
+	Ogre::Root* mOgreRoot;
+	Ogre::SceneManager* mOgreSceneMgr;
+	OverlaySystem *mOgreOverlaySystem;
+
+public:
+	// Constructor Destructor
+	MainProgram();
+	virtual ~MainProgram();
+	
+	// The Launch Program
+	bool RunProgram();
+
+	// Create Scene
+	void CreateScene();
+};
+
+#endif //endif Main.hpp Header Guard.

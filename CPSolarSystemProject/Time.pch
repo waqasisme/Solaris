@@ -1,0 +1,134 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    Time.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   Time.pch is the file that contains all the time and date related methods. These methods are the
+   core functionality of our simulator, giving us all
+
+-------------------------------------------------------------------------------------------------
+*/
+
+#ifndef Time_h_
+#define Time_h_
+
+#include "Defines.pch"
+#include <ctime>
+
+using namespace Ogre;
+
+
+
+int dayofweek(int d, int m, int y)
+	{
+		static int t[] = { 0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4 };
+		y -= m < 3;
+	
+		return (y + y/4 - y/100 + y/400 + t[m-1] + d)%7;
+	}
+
+class Time {
+private:
+	time_t NaturalTime;
+	struct tm* T;
+
+public:
+	Time(): NaturalTime(time(0)), T(localtime(&NaturalTime))
+	{
+		T->tm_mon++;
+		T->tm_year += 1900;
+	}
+
+	Time(int d, int m, int y): NaturalTime(0), T(0)
+	{
+		NaturalTime = time(0);
+		T = localtime(&NaturalTime);
+		
+		T->tm_mday +=d;		
+		T->tm_mon += m+1;
+		T->tm_year += y+1900;
+	}
+
+	String getCurrentDay(bool seed = true)
+	{
+		if(seed)
+			Seed();
+
+		return week[dayofweek(T->tm_mday, T->tm_mon+1, T->tm_year+1900)];
+	}
+
+	String getCurrentTime(bool seed = true)
+	{
+		if(seed)
+			Seed();
+	
+		return StringConverter::toString(T->tm_hour) + ":" + StringConverter::toString(T->tm_min) + ":" + 
+			StringConverter::toString(T->tm_sec);
+	}
+
+	String getCurrentDate(bool seed = true)
+	{
+		if(seed)
+			Seed();
+
+		return StringConverter::toString(T->tm_mday) + "/" + StringConverter::toString(T->tm_mon+1) + "/" + 
+				StringConverter::toString(T->tm_year+1900);		
+	}
+	
+	Time operator ^ (BIGNUM t)
+	{
+		T->tm_sec += 5580*t;
+
+		if(T->tm_sec > 60)
+		{
+			T->tm_min += T->tm_sec/60;
+			T->tm_sec %= 60;
+		}
+
+		if(T->tm_min > 60)
+		{
+			T->tm_hour += T->tm_min/60;
+			T->tm_min %= 60;
+		}
+		
+		if(T->tm_hour >= 24)
+		{
+			T->tm_mday += T->tm_hour/24;
+			T->tm_hour %= 24;
+		}
+
+		if(T->tm_mday > 31)
+		{
+			T->tm_mon += T->tm_mday/31;
+			T->tm_mday %= 31;
+		}
+		
+		if(T->tm_mon > 12)
+		{
+			T->tm_year += T->tm_mon/12;
+			T->tm_mon %= 12;
+		}
+
+		return *this;
+	}
+
+	Time operator ^= (BIGNUM t)
+	{
+		*this = *this ^ t;
+
+		return *this;
+	}
+
+	void Seed()
+	{
+		NaturalTime = time(0);
+		T = localtime(&NaturalTime);
+		T->tm_mon++;
+		T->tm_year += 1900;
+	}
+	
+};
+
+#endif

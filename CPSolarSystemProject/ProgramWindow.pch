@@ -1,0 +1,48 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    ProgramWindow.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   ProgramWindow.pch contains a class that has everything required to get an Ogre3D render window
+   up and running. It accomplishes this by getting a pointer to the Render Window from Ogre and 
+   registering handles to that pointer from windows.
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef ProgWin_h_
+#define ProgWin_h_
+
+#include "Defines.pch"
+
+using namespace Ogre;
+
+
+//-----------------------------------------------------------------------------------------------------------------
+class ProgWindow: public WindowEventListener {
+protected:
+	RenderWindow* mWindow;
+public:
+	ProgWindow(): mWindow(0)	// Constructor
+	{}
+
+	void setWindow(Root* mRoot, String WinName)	// Mutator (register our window with Windows)
+	{
+		mWindow = mRoot->initialise(true, WinName); 
+	}
+
+	RenderWindow* getWindow()	// Accessor
+	{
+		return mWindow;
+	}
+
+	virtual ~ProgWindow() {}	// Destructor
+
+};
+
+
+
+#endif //endif ProgramWindow.pch header guard

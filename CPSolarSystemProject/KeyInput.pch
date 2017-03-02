@@ -1,0 +1,48 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    KeyInput.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   KeyInput.pch contains a class inherited from ogre's own KeyListener class. Our Class KeyInput
+   overrides functions from the KeyListener class (which is abstract) and contains pointer to a
+   Keyboard (from OIS) 
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef Keyboard_h_
+#define Keyboard_h_
+
+#include "Defines.pch"
+
+using namespace Ogre;
+
+
+//-----------------------------------------------------------------------------------------------------------------
+class KeyInput: public OIS::KeyListener {
+protected:
+	OIS::Keyboard* mKeyboard;
+public:
+	KeyInput(): mKeyboard(0)	// Constructor
+	{	}
+
+	void setKeyboard(OIS::Keyboard* Kptr)	// Mutator
+	{
+		mKeyboard = Kptr;
+	}
+
+	OIS::Keyboard* getKeyboard()	// Accessor
+	{
+		return mKeyboard;
+	}
+
+	virtual ~KeyInput() {}	// Destructor
+
+};
+
+
+
+#endif //endif KeyInput.pch header guard

@@ -1,0 +1,241 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    GUI.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   GUI.pch is the GUIManager for our program, it contains all the functionality related to our
+   program's interface (buttons, menus, etc). It is inherited from the SDKTrayListener class.
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef GUI_h_
+#define GUI_h_
+
+#include "Defines.pch"
+#include "FilePaths.pch"
+#include "Time.pch"
+
+
+//-----------------------------------------------------------------------------------------------------------------
+class GUIManager: public OgreBites::SdkTrayListener {
+protected:
+		// OgreBites
+    OgreBites::SdkTrayManager* mTrayMgr;	   // Manages ALL the menus/buttons/panels
+    OgreBites::SdkCameraMan* mCameraMan;       // Basic camera controller
+    
+	OgreBites::ParamsPanel* mHelpBox;		   // Display Help and basic Program Controls
+	OgreBites::ParamsPanel* mCoordsPanel;	   // A details panel that will display the coordinates
+	OgreBites::ParamsPanel* mTimeDisplay;	   // A details panel to display the current time
+	OgreBites::ParamsPanel* mOffsetDisplay;	   // A details panel to display the current simulation speed
+	OgreBites::TextBox* mPlanetInfoBox;		   // A details panel to display infor for planet in view
+
+	OgreBites::InputContext mInputContext;	   // To capture mouse and keyboard events
+	
+	Ogre::StringVector vPlanetNames;
+	Ogre::StringVector vPlanetInfo;
+
+public:
+		// Constructor
+	GUIManager(): mTrayMgr(0),  mCameraMan(0), mHelpBox(0), mCoordsPanel(0), mTimeDisplay(0), mOffsetDisplay(0), mPlanetInfoBox(0)
+	{	}
+
+		// Accessor
+	OgreBites::SdkTrayManager* getTrayMgr() const
+	{
+		return mTrayMgr;
+	}
+
+	void setupGUI(Ogre::String, Ogre::RenderWindow*);	// Setup all the gui, create tray manager etc
+	void CreateCoordsPanel();							// Create the panel to display coordinates
+	void UpdateCoordsPanel();							// Update coordinate values at every frame
+	void CreateTimePanel();								// Create the clock
+	void CreateOffsetPanel();							// Create the offset panel
+	void UpdateOffsetPanel(BIGNUM Offset);				// Update the offset panel 
+	void UpdateTimePanel(BIGNUM FPS);					// Update contents of the clock
+	void CreateHelpBox();								// Create the Help box
+	void CreateInfoBox();								// Create a textbox that display planet info
+	void UpdateInfoBox();								// Update the textbox to show info for current planet
+
+		// Destructor
+	virtual ~GUIManager()
+	{
+		if (mTrayMgr) delete mTrayMgr;
+		if (mCameraMan) delete mCameraMan;
+	}
+
+};
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::setupGUI(Ogre::String InterfaceName, Ogre::RenderWindow* rWindow)
+{
+	mTrayMgr = new OgreBites::SdkTrayManager(InterfaceName, rWindow, mInputContext, this);
+	mTrayMgr->hideCursor();
+	
+	for(unsigned int i = 0; i < 10; i++)
+	{
+		vPlanetNames.push_back(PlanetNames[i]);
+	}
+
+	FilePaths f;
+	
+	for(unsigned int i = 0; i < vPlanetNames.size(); i++)
+	{
+		vPlanetInfo.push_back(f.getPlanetInfo(vPlanetNames[i]));
+	}
+	
+	CreateCoordsPanel();
+	CreateOffsetPanel();
+	CreateTimePanel();
+	CreateHelpBox();
+	CreateInfoBox();
+	mTrayMgr->setWidgetPadding(0);
+	mTrayMgr->hideBackdrop();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::CreateCoordsPanel()
+{
+    Ogre::StringVector Coordinates;
+	Coordinates.push_back("   Position");
+    Coordinates.push_back("PlayerX");
+    Coordinates.push_back("PlayerY");
+    Coordinates.push_back("PlayerZ");
+    Coordinates.push_back("   Vision");
+    Coordinates.push_back("CamW") ;
+    Coordinates.push_back("CamX");
+    Coordinates.push_back("CamY");
+    Coordinates.push_back("CamZ");
+    
+	mCoordsPanel = mTrayMgr->createParamsPanel(OgreBites::TL_NONE, "Coordinates", 200, Coordinates);
+    mCoordsPanel->hide();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::UpdateCoordsPanel()
+{
+	mCoordsPanel->setParamValue(1, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedPosition().x));
+    mCoordsPanel->setParamValue(2, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedPosition().y));
+    mCoordsPanel->setParamValue(3, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedPosition().z));
+    mCoordsPanel->setParamValue(5, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedOrientation().w));
+    mCoordsPanel->setParamValue(6, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedOrientation().x));
+    mCoordsPanel->setParamValue(7, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedOrientation().y));
+    mCoordsPanel->setParamValue(8, Ogre::StringConverter::toString(mCameraMan->getCamera()->getDerivedOrientation().z));
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::CreateTimePanel()
+{
+	StringVector t;
+	t.push_back(" Current Date");
+	mTimeDisplay = mTrayMgr->createParamsPanel(OgreBites::TL_TOP, "TIME", 360, t);
+	UpdateTimePanel(0);
+	mTimeDisplay->show();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::CreateOffsetPanel()
+{
+	StringVector t;
+	t.push_back(" Currently Simulating");
+	mOffsetDisplay = mTrayMgr->createParamsPanel(OgreBites::TL_BOTTOM, "OFFSET", 460, t);
+	UpdateOffsetPanel(1);
+	mOffsetDisplay->show();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::UpdateOffsetPanel(BIGNUM RealTime)
+{
+	unsigned long Offset = (unsigned long)RealTime;
+	Real OffsetFraction =  RealTime - Offset;
+
+	mOffsetDisplay->setParamValue(0, StringConverter::toString((Offset + OffsetFraction)*3.875) + " Earth Days/Second ");
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::UpdateTimePanel(BIGNUM i)
+{
+	static Time t;
+
+	t ^= (i);
+
+	mTimeDisplay->setParamValue(0, t.getCurrentDay(false) + " " + t.getCurrentTime(false) + " " + t.getCurrentDate(false) + " ");
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::CreateHelpBox()
+{
+	StringVector HelpContents;
+	HelpContents.push_back("            HELP");
+	HelpContents.push_back("__________________________");
+	HelpContents.push_back("F1");
+	HelpContents.push_back("F5");
+	HelpContents.push_back("F");
+	HelpContents.push_back("D");
+	HelpContents.push_back("T");
+	HelpContents.push_back("L");
+	HelpContents.push_back("P");
+	HelpContents.push_back("+/-");
+	HelpContents.push_back("[ and ]");
+	HelpContents.push_back("Mouse");
+	HelpContents.push_back("WASD");
+	HelpContents.push_back("Space Bar");
+	HelpContents.push_back("PrntScr");
+	HelpContents.push_back("M/N");
+	HelpContents.push_back("ESC"); 
+	
+	mHelpBox = mTrayMgr->createParamsPanel(OgreBites::TL_LEFT, "HELP", 270, HelpContents);
+	mHelpBox->setParamValue(2, " Show/Hide Controls");
+	mHelpBox->setParamValue(3, " Refresh All Textures");
+	mHelpBox->setParamValue(4, " Go To Next Planet");
+	mHelpBox->setParamValue(5, " Show/Hide Planet Data");
+	mHelpBox->setParamValue(6, " Show/Hide Clock Details");
+	mHelpBox->setParamValue(7, " Toggle PlanetLock Mode");
+	mHelpBox->setParamValue(8, " Show/Hide Coordinates");
+	mHelpBox->setParamValue(9, " +/- Simulation Speed");
+	mHelpBox->setParamValue(10, " Zoom In/Out");
+	mHelpBox->setParamValue(11, " Look Around");
+	mHelpBox->setParamValue(12, " Move Around");
+	mHelpBox->setParamValue(13, " Pause Simulation");
+	mHelpBox->setParamValue(14, " Take A Screenshot");
+	mHelpBox->setParamValue(15, " +/- G-Constant (unsafe)");
+	mHelpBox->setParamValue(16, " Quit Program");
+
+	mHelpBox->show();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::CreateInfoBox()
+{
+	mPlanetInfoBox = mTrayMgr->createTextBox(OgreBites::TL_NONE, "PLANET", "", 270, 380);	
+	mPlanetInfoBox->hide();
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------
+void GUIManager::UpdateInfoBox()
+{
+	static int i = 0;
+
+	i = i%vPlanetNames.size();
+
+	mPlanetInfoBox->setCaption(vPlanetNames[i]);
+	mPlanetInfoBox->setText(vPlanetInfo[i]);
+	
+	i++;
+}
+
+
+
+#endif //endif GUI.pch header guard

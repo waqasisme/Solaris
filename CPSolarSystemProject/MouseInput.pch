@@ -1,0 +1,45 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    MouseInput.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratarium Project.
+   
+   MouseInput.pch contains a class that allows us to use the mouse when our program is running.
+   It allows us to fire up events when the mouse is moved or when a button is clicked. It does
+   this by overriding some functions from the abstract class (MouseListener), from which it is
+   inherited.
+
+-------------------------------------------------------------------------------------------------
+*/
+	// Header Guard
+#ifndef Mouse_h_
+#define Mouse_h_
+
+#include "Defines.pch"
+
+
+//-----------------------------------------------------------------------------------------------------------------
+class MouseInput: public OIS::MouseListener {
+protected:
+	OIS::Mouse* mMouse;
+public:
+	MouseInput(): mMouse(0)		// Constructor
+	{}
+
+	void setMouse(OIS::Mouse* Mptr)	// Mutator
+	{
+		mMouse = Mptr;
+	}
+
+	OIS::Mouse* getMouse()	// Accessor
+	{
+		return mMouse;
+	}
+
+	virtual ~MouseInput() {}	// Destructor
+
+};
+
+
+#endif //endif MouseInput.pch header guard

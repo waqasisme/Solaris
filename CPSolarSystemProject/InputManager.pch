@@ -1,0 +1,358 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    InputManager.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   InputManager.pch contains the InputListener class. It has links to eveything relate to I/O and
+   control, registering with the computer hardware, and rendering frames along with checking keys
+   and user actions at everty frame.
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef Inputs_h_
+#define Inputs_h_
+
+#include "Defines.pch"
+#include "Camera.pch"
+#include "MouseInput.pch"
+#include "KeyInput.pch"
+#include "ProgramWindow.pch"
+#include "GUI.pch"
+#include "SolarSystem.pch"
+
+class InputListener: public CameraInput, public MouseInput, public KeyInput, public ProgWindow, public GUIManager, public Ogre::FrameListener {
+private:
+	bool mCursorWasVisible;                    // was cursor visible before dialog appeared
+    bool mShutDown;							   // has user close window/pressed Esc
+	bool mLock;								   // Follow A planet
+	bool mPauseSimulation;					   // Pause functionality (not control)
+	int CycleCount;							   // which planet to focus on
+	BIGNUM TimeOffset;						   // control time speed
+	SolarSystem* System;					   // for interaction
+	OIS::InputManager* mInputManager;		   // OIS Input devices (derived) and Input Manager 
+
+public:
+		// Constructor
+	InputListener(): mCursorWasVisible(false), mShutDown(false), mPauseSimulation(false), mLock(false),
+		mInputManager(0), System(0), TimeOffset(0), CycleCount(0)
+	{	}
+
+	void setupInput();							// Register hardware to listen to app events
+	void setupFrameListener(Ogre::Root*);		// Register app to listen to frame events
+
+		// OIS::WindowEventListeners
+	void windowClosed(Ogre::RenderWindow*);		// Unattach OIS before window shutdown (very important)
+	void windowResized(Ogre::RenderWindow*);	// Adjust Mouse Clipping Area around window
+    
+		// OIS::KeyListeners
+	virtual bool keyPressed(const OIS::KeyEvent&);
+    virtual bool keyReleased(const OIS::KeyEvent&);
+
+		// OIS::MouseListeners
+    virtual bool mouseMoved(const OIS::MouseEvent&);
+    virtual bool mousePressed(const OIS::MouseEvent&, OIS::MouseButtonID);
+    virtual bool mouseReleased(const OIS::MouseEvent&, OIS::MouseButtonID);
+
+		// Ogre::FrameListener
+    virtual bool frameRenderingQueued(const Ogre::FrameEvent&);
+
+		// Animation function
+	void Animate(const Ogre::FrameEvent&);
+
+	void AddSystem(SolarSystem* Ssystem)	// Add a Solar System
+	{	System = Ssystem;	}
+
+	virtual ~InputListener()	// Destructor
+	{
+			//Remove ourselves as a Window listener
+		Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
+		windowClosed(mWindow);
+	}
+
+};
+
+
+//-------------------------------------------------------------------------------------------------
+void InputListener::setupInput()
+{	
+		// Post OIS Startup to log file
+    Ogre::LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
+    OIS::ParamList pl;
+    size_t windowHnd = 0;
+    std::ostringstream windowHndStr;
+		
+		// Windows stuff
+    mWindow->getCustomAttribute("WINDOW", &windowHnd);
+    windowHndStr << windowHnd;
+    pl.insert(std::make_pair(std::string("WINDOW"), windowHndStr.str()));
+		
+		// Start OIS
+    mInputManager = OIS::InputManager::createInputSystem( pl );
+			
+		// Create input objects
+    mKeyboard = static_cast<OIS::Keyboard*>(mInputManager->createInputObject(OIS::OISKeyboard, true));
+    mMouse = static_cast<OIS::Mouse*>(mInputManager->createInputObject(OIS::OISMouse, true));
+		
+		// Add currently attached mouse and keyboard to app
+	mInputContext.mKeyboard = mKeyboard;
+    mInputContext.mMouse = mMouse;
+		
+		// prime mouse and keyboard for respond
+    mMouse->setEventCallback(this);
+    mKeyboard->setEventCallback(this);
+
+		//Set initial mouse clipping size
+    windowResized(mWindow);
+		
+		//Register us as a Window listener
+    Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);
+
+	mCameraMan = new OgreBites::SdkCameraMan(mCamera);   // create a default camera controller
+
+}
+
+
+//-------------------------------------------------------------------------------------------------
+void InputListener::setupFrameListener(Ogre::Root* mRoot)
+{
+	mRoot->addFrameListener(this);
+}
+
+
+//-------------------------------------------------------------------------------------------------
+void InputListener::windowResized(Ogre::RenderWindow* rWindow)
+{
+    unsigned int width, height, depth;
+    int left, top;
+    
+		// Get current window measurements
+	rWindow->getMetrics(width, height, depth, left, top);
+		
+		// Set mouse bounds
+    const OIS::MouseState &ms = mMouse->getMouseState();
+    ms.width = width;
+    ms.height = height;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+void InputListener::windowClosed(Ogre::RenderWindow* rWindow)
+{
+		// Only close for window that created OIS (the main window of our program)
+    if(rWindow == mWindow && mInputManager!=0)
+    {
+		mInputManager->destroyInputObject(mMouse);		// Unregister Mouse
+        mInputManager->destroyInputObject(mKeyboard);	// Unregister Keyboard
+			
+			// Destruct InputManager Object
+        OIS::InputManager::destroyInputSystem(mInputManager); 
+        mInputManager = 0;
+    }
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::keyPressed(const OIS::KeyEvent &arg)
+{
+    if(mTrayMgr->isDialogVisible()) return true;   // don't process any more keys if dialog is up
+
+	switch(arg.key)
+	{
+	case OIS::KC_F1:		// Toggle helpbox
+		if(mHelpBox->isVisible())
+        {
+			mTrayMgr->removeWidgetFromTray(mHelpBox);
+			mHelpBox->hide();
+        }
+        else	{
+			mTrayMgr->moveWidgetToTray(mHelpBox, OgreBites::TL_TOPLEFT, 0);
+            mHelpBox->show();
+				}
+		break;
+	case OIS::KC_D:
+		if(mPlanetInfoBox->isVisible())
+		{
+			mTrayMgr->moveWidgetToTray(mPlanetInfoBox, OgreBites::TL_NONE, 0);
+			mPlanetInfoBox->hide();
+		}
+		else {
+			mTrayMgr->moveWidgetToTray(mPlanetInfoBox, OgreBites::TL_BOTTOMRIGHT, 0);
+			mPlanetInfoBox->show();
+			 }
+		break;
+	case OIS::KC_F:			// cycle through planets
+		mLock = true;
+		UpdateInfoBox();
+		mTrayMgr->moveWidgetToTray(mCoordsPanel, OgreBites::TL_TOPRIGHT, 0);
+        mCoordsPanel->show();
+		CycleCount  %= 10;
+		mCamera->setPosition(System->findPlanet(PlanetNames[CycleCount++]));
+		mTrayMgr->moveWidgetToTray(mPlanetInfoBox, OgreBites::TL_BOTTOMRIGHT, 0);
+		mPlanetInfoBox->show();
+		break;
+	case OIS::KC_P:			// toggle visibility of CoordinatePanels
+		if(mCoordsPanel->isVisible())
+        { 
+			mTrayMgr->removeWidgetFromTray(mCoordsPanel);
+            mCoordsPanel->hide();
+        }
+        else	{
+			mTrayMgr->moveWidgetToTray(mCoordsPanel, OgreBites::TL_TOPRIGHT, 0);
+            mCoordsPanel->show();
+				}
+		break;
+	case OIS::KC_T:			// toggle visibility of TimePanel
+		if(mTimeDisplay->isVisible())
+        {
+			mTrayMgr->removeWidgetFromTray(mTimeDisplay);
+            mTimeDisplay->hide();
+		}
+        else	{
+			mTrayMgr->moveWidgetToTray(mTimeDisplay, OgreBites::TL_TOP, 0);
+		    mTimeDisplay->show();
+				}
+		break;
+	case OIS::KC_L:			// Latch Onto a Planet's Position
+		mLock = !mLock;
+		break;
+	case OIS::KC_RBRACKET:// Zoom In
+		mLock = false;
+		mCamera->moveRelative(Vector3(0, 0, -10000));
+		break;
+	case OIS::KC_LBRACKET:	// Zoom Out
+		mLock = false;
+		mCamera->moveRelative(Vector3(0, 0, +10000));
+		break;
+	case OIS::KC_M:			// Turn up the G
+		System->GravityConstant++;
+		break;
+	case OIS::KC_N:			// Turn it back down
+		System->GravityConstant--;
+		break;
+	case OIS::KC_EQUALS:	// Speed up simulation
+		TimeOffset++;
+		break;
+	case OIS::KC_MINUS:		// Slow down simulation
+		TimeOffset--;
+		break;
+	case OIS::KC_SPACE:		// Pause the simulation
+		mPauseSimulation = !mPauseSimulation;
+		break;
+	case OIS::KC_ESCAPE:	// Quit the program
+		mShutDown = true;
+		break;
+	case OIS::KC_F5:		// Refresh textures
+		Ogre::TextureManager::getSingleton().reloadAll();
+		break;
+	case OIS::KC_SYSRQ:		// Take a screenshot
+		mWindow->writeContentsToTimestampedFile("SolarScreenshot", ".jpg");
+		break;
+	}
+
+	mCameraMan->injectKeyDown(arg);
+    
+	return true;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::keyReleased(const OIS::KeyEvent &arg)
+{
+    mCameraMan->injectKeyUp(arg);
+    
+	return true;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::mouseMoved(const OIS::MouseEvent &arg)
+{
+    if(mTrayMgr->injectMouseMove(arg)) return true;
+    
+	mCameraMan->injectMouseMove(arg);
+    
+	return true;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::mousePressed(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+{
+    if(mTrayMgr->injectMouseDown(arg, id)) return true;
+
+	mCameraMan->injectMouseDown(arg, id);
+   
+	return true;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id)
+{
+    if(mTrayMgr->injectMouseUp(arg, id)) return true;
+    
+	mCameraMan->injectMouseUp(arg, id);
+    
+	return true;
+}
+
+
+//-------------------------------------------------------------------------------------------------
+bool InputListener::frameRenderingQueued(const Ogre::FrameEvent& evt)
+{	
+	static BIGNUM FramesToMove = 0;
+
+	if(!mPauseSimulation)
+	{
+		System->Move(FramesToMove);
+		FramesToMove += Math::Pow(2, TimeOffset);
+	}
+
+	if(mWindow->isClosed())
+        return false;
+
+    if(mShutDown)
+        return false;
+
+	mInputContext.capture();
+
+    mTrayMgr->frameRenderingQueued(evt);
+
+    if(!mTrayMgr->isDialogVisible())
+    {
+        mCameraMan->frameRenderingQueued(evt);   // if dialog isn't up, then update the camera
+        
+		if(mCoordsPanel->isVisible())	// if details panel is visible, then update its contents
+        {
+			UpdateCoordsPanel();		// Update Coordinates in Panel
+        }
+
+		if(!mPauseSimulation)	// if time panel is visible, then update its contents
+        {
+			if(System->CheckEclipse())	// and check for eclipse condition
+			{
+				mLock = true;	
+			}
+
+			if(mLock)		// Latch Onto A Planets	Position
+			{
+				mCamera->setPosition(System->findPlanet(PlanetNames[CycleCount-1]));
+				mCamera->moveRelative(Vector3(0, +1600, +8000));
+				mCamera->lookAt(0, 0, 0);
+			}
+
+			UpdateTimePanel(Math::Pow(2, TimeOffset));		// Update Time panel
+			UpdateOffsetPanel(Math::Pow(2, TimeOffset));	// Update Offset panel
+		}
+	
+	}
+	
+	return true;
+
+}
+
+#endif //endif InputManager.pch header guard

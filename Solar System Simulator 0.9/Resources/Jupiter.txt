@@ -1,0 +1,14 @@
+Mass (10^24kg): 1898                                    
+Diameter (km): 142,984                                               
+Density (kg/m^3): 1326                                            
+Gravity (m/s^2): 23.1                                                 
+Escape Velocity (km/s): 59.5                                      
+Rotation Period (hours): 9.9                                
+Length of Day (hours): 9.9                                  
+Distance from Sun (10^6 km): 778.6                           
+Orbital Period (days): 4331                                           
+Orbital Velocity (km/s): 13.1                                           
+Orbital Inclination (degrees): 1.3                                  
+Mean Temperature (C): -110                                          
+Number of Moons: 67                                      
+Ring System? Yes

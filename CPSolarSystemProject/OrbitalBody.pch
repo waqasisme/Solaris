@@ -1,0 +1,55 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    OrbitalBody.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   OrbitalBody.pch contains the class we used to instantiate planets
+
+-------------------------------------------------------------------------------------------------
+*/
+
+	// Header Guard
+#ifndef __OrbitalBody_h_
+#define __OrbitalBody_h_
+
+#include "Defines.pch"
+
+using namespace Ogre;
+
+
+//-------------------------------------------------------------------------------------------------------------------
+class OrbitalBody {
+public:
+	String sName, sMesh, sOrbiting;		// Body name, meshfile and centre of orbit name
+private:	
+	Real rX, rY, rZ;					// Interstellar Coordinates
+	Real rBodyDiam;						// Diameter of body
+	Real rOrbitRadius;					// Distance from the sun
+	Real rYear;							// Can be negative based on spin direction
+	Real rSpin;							// Can be negative depending on orbit direction
+	Degree degInitialAngle;				// Initital Angel planet is at
+	Quaternion qSlant, qOrbitSlant, qOrientationNow;	// Quaternions for oribtal slant, axial tilt etc
+	
+public:
+	OrbitalBody(String Name, String MeshName, String IsOrbiting, Real Dameter, Real rOrbitRadius, Real rYear, Real rSpin,
+			Real rXorb, Real rYorb, Real rZorb, Real rXort, Real rYort, Real rZort);	// Constructor to initialize values
+
+	void getNext(Real time, SceneManager*, Real gConstant);	// Set coordinate to match next predicted position
+
+	String getName();
+	
+	String getIsOrbiting();
+	
+	Vector3 getPosition();
+	
+	Quaternion getOrientation();
+
+	Radian CircleFraction(Real rYear, Real time);	// Determine how much and where a planet will move each frame
+	
+	~OrbitalBody();	// Destructor
+
+};
+
+#endif	// endif OrbitalBody.pch header guard

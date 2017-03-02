@@ -1,0 +1,50 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    Defines.pch
+-------------------------------------------------------------------------------------------------
+
+This precompiled header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   Defines.pch only has all of the possible include directives for OGRE3D, Boost, CEGUI and
+   SDKrays headers and plugins that were required for our project.
+
+-------------------------------------------------------------------------------------------------
+*/
+	// Header Guard
+#ifndef Defines_h_
+#define Defines_h_
+
+	// std stuff
+#include <iostream>
+#include <fstream>
+
+	// Ogre3d stuff.
+#include <OgreCamera.h>
+#include <OgreConfigFile.h>
+#include <OgreEntity.h>
+#include <OgreException.h>
+#include <OgreLogManager.h>
+#include <OgreRenderWindow.h>
+#include <OgreRoot.h>
+#include <OgreSceneManager.h>
+#include <OgreTimer.h>
+#include <OgreViewport.h>
+
+	// OIS input stuff.
+#include <OISEvents.h>
+#include <OISInputManager.h>
+#include <OISKeyboard.h>
+#include <OISMouse.h>
+
+	// OgreBites Listeners.
+#include <SdkCameraMan.h>
+#include <SdkTrays.h>
+
+	// A really large 128 bit number.
+typedef unsigned long double BIGNUM;
+
+
+const Ogre::String PlanetNames[] = {"Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Luna (Earth's Moon)"};
+const Ogre::String week[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
+
+#endif //endif Defines.h header guard

@@ -1,0 +1,44 @@
+#ifndef __SolarSystem_h_
+#define __SolarSystem_h_
+
+#include "Defines.pch"
+#include "OrbitalBody.pch"
+
+using namespace Ogre;
+
+
+//------------------------------------------------------------------------------------------------------------------------
+class SolarSystem {
+private:
+	SceneManager *oSceneManager;		// SceneManager ptr, to plot everything as entities
+	std::vector<OrbitalBody*> vPlanets; // list of planets
+	std::vector<OrbitalBody*> vMoons;   // list of Moons
+	std::vector<OrbitalBody*> vDebris;  // Others
+	Real GravityConstant;				// Gravitational constant, default value at one
+public:
+	SolarSystem(SceneManager*);	// Constructor
+		
+		// Add info for a planet and make an entity out of it
+	void addPlanet(String pName, String pMesh, String pIsFacing, Real pScale, Real Diameter, Real pOrbitRadius, 
+		Real pYear, Real pSpin,	Real pXorb, Real pYorb, Real pZorb, Real pXort, Real pYort, Real pZort);	
+	
+	void addPlanets();	// Plot everything
+	
+	void addBody(OrbitalBody *oPlanet, Real rScale);	// Plot a single body
+
+	void Move(Real Speed);	// Animate Solar System
+
+	bool CheckEclipse();	// Check for Eclipse
+
+	bool CheckEclipse(const String Body1, const String Body2);	// Check for Eclipse between two bodies
+
+	Vector3 SolarSystem::findPlanet();	//	Find a certain Planet and return its coordinates
+	Vector3 SolarSystem::findPlanet(const String);
+	
+	~SolarSystem();	// Destructor
+
+	friend class InputListener;
+};
+
+
+#endif

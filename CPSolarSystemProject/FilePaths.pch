@@ -1,0 +1,119 @@
+/*
+-------------------------------------------------------------------------------------------------
+Filename:    FilePaths.pch
+-------------------------------------------------------------------------------------------------
+
+This header file is part of the iMagiNext 2014 Solar Exploratorium Project.
+   
+   FilePaths.pch only serves a resource directory. It has a class that contains the names of all
+   the files that are required by the program (As Strings) and getter setter methods for these
+   strings.
+
+-------------------------------------------------------------------------------------------------
+*/
+
+
+#ifndef FilePaths_h_
+#define FilePaths_h_
+
+#include "Defines.pch"
+
+using namespace Ogre;
+
+//-------------------------------------------------------------------------------------------------
+class FilePaths
+{
+private:
+	String sCfgFolder;
+	String fConfigFile;
+	String fResourcesFile;
+    String fPluginsFile;
+	String fLogFile;
+
+public:
+	FilePaths(): sCfgFolder(StringUtil::BLANK), fConfigFile(StringUtil::BLANK), fResourcesFile(StringUtil::BLANK),
+		fPluginsFile(StringUtil::BLANK), fLogFile(StringUtil::BLANK)
+	{	}
+
+	void setFilePaths(const String, const String, const String, const String, const String);
+	
+	String getPlanetFile(String) const;
+
+	String getPlanetInfo(String) const;
+
+	String getFilePaths(String) const;
+
+	virtual ~FilePaths()
+	{	}
+
+
+	class File_Not_Found {};
+
+};
+
+//---------------------------------------------------------------------------------------------------------------
+void FilePaths::setFilePaths(const String Folder = "./CFG", const String Resources = "/SolarisResources.cfg",
+	const String Plugins = "/SolarisPlugins.cfg", const String Cfg = "/SolarisConfig.cfg", const String Log = "/SolarisLog.Log")
+{
+	sCfgFolder = Folder;
+	fConfigFile = Folder + Cfg;
+	fPluginsFile = Folder + Plugins;
+	fResourcesFile = Folder + Resources;
+	fLogFile = Folder + Log;
+}
+
+
+//---------------------------------------------------------------------------------------------------------------
+String FilePaths::getPlanetFile(const String PlanetName) const
+{
+	return PlanetName + ".txt";
+}
+
+
+//---------------------------------------------------------------------------------------------------------------
+String FilePaths::getPlanetInfo(const String PlanetName) const
+{
+	std::ifstream fin;
+	fin.open("./Resources/" + PlanetName + ".txt");
+	
+	if(!fin)
+		throw File_Not_Found();
+
+	String I, INFO(StringUtil::BLANK);
+	
+	while(!fin.eof())
+	{
+		getline(fin, I);
+		INFO += I;
+	}
+
+	fin.close();
+
+
+	return INFO;
+}
+
+
+//---------------------------------------------------------------------------------------------------------------
+String FilePaths::getFilePaths(const String l) const
+{
+	if(l == "f")
+		return sCfgFolder;
+
+	if(l == "p")
+		return fPluginsFile;
+
+	if(l == "c")
+		return fConfigFile;
+
+	if(l == "r")
+		return fResourcesFile;
+
+	if(l == "l")
+		return fLogFile;
+
+	throw File_Not_Found();
+}
+
+
+#endif //endif Header Guard for FilePaths.pch

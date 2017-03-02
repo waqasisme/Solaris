@@ -1,0 +1,30 @@
+﻿Build started 07-Jun-14 5:54:52 PM.
+     1>Project "C:\Users\Waqas\Documents\Course Material\SEMESTER II\CP\Programs\CPSolarSystemProject\CPSolarSystemProject\CPSolarSystemProject.vcxproj" on node 2 (build target(s)).
+     1>InitializeBuildStatus:
+         Creating "obj\Release\CPSolarSystemProject.unsuccessfulbuild" because "AlwaysCreate" was specified.
+       ClCompile:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /Iinclude /I"C:\OgreSDK\OgreSDK_v1-9-0\include" /I"C:\OgreSDK\OgreSDK_v1-9-0\include\OGRE" /I"C:\OgreSDK\OgreSDK_v1-9-0\include\OGRE\Overlay" /I"C:\OgreSDK\OgreSDK_v1-9-0\include\OIS" /I"C:\OgreSDK\OgreSDK_v1-9-0\include\boost" /I"C:\OgreSDK\OgreSDK_v1-9-0\Samples\Common\include" /I"C:\OgreSDK\OgreSDK_v1-9-0\boost" /I"C:\OgreSDK\boost-1.56\boost" /Zi /nologo /W3 /WX- /O2 /Ob1 /Oi /Ot /Oy /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _MBCS /GF /Gm /EHsc /MD /GS- /Gy /fp:fast /Zc:wchar_t /Zc:forScope /GR /Fo"obj\Release\\" /Fd"obj\Release\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Main.cpp
+         Main.cpp
+       Link:
+         c:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"bin\Release\\CPSolarSystemProject.exe" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\OgreSDK\OgreSDK_v1-9-0\lib\release" /LIBPATH:"C:\OgreSDK\boost-1.56\lib" /LIBPATH:"C:\OgreSDK\OgreSDK_v1-9-0\boost\lib" OgreMain.lib OIS.lib OgreOverlay.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /ManifestFile:"obj\Release\CPSolarSystemProject.exe.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /PDB:"C:\Users\Waqas\Documents\Course Material\SEMESTER II\CP\Programs\CPSolarSystemProject\CPSolarSystemProject\bin\Release\CPSolarSystemProject.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"bin\Release\CPSolarSystemProject.lib" /MACHINE:X86 obj\Release\Main.obj
+         obj\Release\OrbitalBody.obj
+         obj\Release\SolarSystem.obj
+         Generating code
+     1>c:\users\waqas\documents\course material\semester ii\cp\programs\cpsolarsystemproject\cpsolarsystemproject\solarsystem.cpp(132): warning C4715: 'SolarSystem::findPlanet' : not all control paths return a value
+         Finished generating code
+         CPSolarSystemProject.vcxproj -> C:\Users\Waqas\Documents\Course Material\SEMESTER II\CP\Programs\CPSolarSystemProject\CPSolarSystemProject\bin\Release\CPSolarSystemProject.exe
+       Manifest:
+         C:\Program Files (x86)\Microsoft SDKs\Windows\v7.0A\bin\mt.exe /nologo /verbose /outputresource:"bin\Release\\CPSolarSystemProject.exe;#1" /manifest obj\Release\CPSolarSystemProject.exe.intermediate.manifest
+       PostBuildEvent:
+         Description: Copying exe to samples bin directory ...
+         copy "bin\Release\\CPSolarSystemProject.exe" "C:\OgreSDK\OgreSDK_v1-9-0\Bin\Release"
+         :VCEnd
+                 1 file(s) copied.
+       FinalizeBuildStatus:
+         Deleting file "obj\Release\CPSolarSystemProject.unsuccessfulbuild".
+         Touching "obj\Release\CPSolarSystemProject.lastbuildstate".
+     1>Done Building Project "C:\Users\Waqas\Documents\Course Material\SEMESTER II\CP\Programs\CPSolarSystemProject\CPSolarSystemProject\CPSolarSystemProject.vcxproj" (build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:17.80
